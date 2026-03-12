@@ -1,0 +1,3 @@
+@echo off
+echo Testing server-info.sh script...
+wsl -e bash -c "cd /mnt/c/Users/User/source/repos/devOPS-test && bash scripts/server-info.sh --help"

@@ -1,0 +1,9 @@
+---
+- name: Deploy Simple App
+  hosts: webservers
+  become: yes
+  vars:
+    app_dir: /opt/simple-app
+  roles:
+    - docker
+    - app

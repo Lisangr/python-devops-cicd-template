@@ -1,0 +1,12 @@
+---
+- name: Handlers for Docker
+  listen: "restart docker"
+  systemd:
+    name: docker
+    state: restarted
+
+- name: Wait for Docker to be ready
+  listen: "restart docker"
+  wait_for:
+    path: /var/run/docker.sock
+    timeout: 30

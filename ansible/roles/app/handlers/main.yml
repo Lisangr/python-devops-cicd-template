@@ -1,0 +1,19 @@
+---
+- name: Handlers for Docker and App
+  listen: "restart docker"
+  systemd:
+    name: docker
+    state: restarted
+
+- name: Wait for Docker to be ready
+  listen: "restart docker"
+  wait_for:
+    path: /var/run/docker.sock
+    timeout: 30
+
+- name: Restart application
+  listen: "restart app"
+  community.docker.docker_compose:
+    project_src: "{{ app_dir }}"
+    state: present
+    restarted: true

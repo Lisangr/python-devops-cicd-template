@@ -1,0 +1,63 @@
+---
+- name: Create application directory
+  file:
+    path: "{{ app_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Copy application files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ app_dir }}/{{ item.dest }}"
+    mode: '0644'
+  loop:
+    - { src: 'app/', dest: 'app/' }
+    - { src: 'Dockerfile', dest: 'Dockerfile' }
+    - { src: 'docker-compose.yml', dest: 'docker-compose.yml' }
+
+- name: Copy scripts directory
+  copy:
+    src: scripts/
+    dest: "{{ app_dir }}/scripts/"
+    mode: '0755'
+
+- name: Build Docker image
+  docker_image:
+    name: simple-app
+    build:
+      path: "{{ app_dir }}"
+    source: build
+
+- name: Start application with docker-compose
+  community.docker.docker_compose:
+    project_src: "{{ app_dir }}"
+    state: present
+
+- name: Wait for container to be ready
+  wait_for:
+    port: 5000
+    host: localhost
+    delay: 10
+    timeout: 60
+
+- name: Check application health endpoint
+  uri:
+    url: "http://localhost:5000/health"
+    method: GET
+    status_code: 200
+  register: health_check
+  retries: 5
+  delay: 10
+
+- name: Display health check result
+  debug:
+    msg: "Application is healthy! Status: {{ health_check.status }}"
+
+- name: Verify container is running
+  community.docker.docker_container_info:
+    name: simple-app
+  register: container_info
+
+- name: Display container status
+  debug:
+    msg: "Container {{ container_info.container.Name }} is {{ container_info.container.State.Status }}"
