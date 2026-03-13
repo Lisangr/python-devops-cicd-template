@@ -29,7 +29,7 @@
     source: build
 
 - name: Start application with docker-compose
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: "{{ app_dir }}"
     state: present
 
