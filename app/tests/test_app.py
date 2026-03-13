@@ -4,7 +4,8 @@ from app.main import app
 @pytest.fixture
 def client():
     app.config['TESTING'] = True
-    with app.test_client() as client: yield client
+    with app.test_client() as client:
+        yield client
 
 def test_index(client):
     response = client.get('/')
@@ -49,14 +50,14 @@ def test_delete_user_success(client):
     # Сначала создаем пользователя для удаления
     create_response = client.post('/api/users', json={"name": "Test User"})
     user_id = create_response.get_json()['id']
-    
+
     # Удаляем пользователя
     delete_response = client.delete(f'/api/users/{user_id}')
     assert delete_response.status_code == 200
     json_data = delete_response.get_json()
     assert json_data['message'] == "User deleted successfully"
     assert json_data['user']['name'] == "Test User"
-    
+
     # Проверяем, что пользователь удален
     get_response = client.get(f'/api/users/{user_id}')
     assert get_response.status_code == 404

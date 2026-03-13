@@ -4,6 +4,8 @@
   become: yes
   vars:
     app_dir: /opt/simple-app
+    app_port: 5000
+    docker_image: simple-app:latest
   roles:
     - docker
     - app

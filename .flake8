@@ -1,0 +1,10 @@
+[flake8]
+max-line-length = 79
+max-complexity = 10
+exclude = __pycache__,.git,.tox,dist,build,*.egg
+ignore = 
+require-plugins = flake8-bugbear
+
+[per-file-ignores]
+__init__.py:F401
+test_*.py:S101

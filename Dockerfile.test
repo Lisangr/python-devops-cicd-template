@@ -1,0 +1,20 @@
+# Dockerfile for testing
+FROM python:3.12-alpine
+
+WORKDIR /app
+
+# Install shellcheck via apk (Alpine package manager)
+RUN apk add --no-cache shellcheck
+
+# Install Python dependencies
+RUN pip install --no-cache-dir pytest flake8 flask==3.0.3
+
+# Copy application
+COPY app/ .
+COPY scripts/ .
+
+# Set environment for testing
+ENV PYTHONPATH=/app
+
+# Default command - run tests
+CMD ["pytest", "tests/", "-v"]

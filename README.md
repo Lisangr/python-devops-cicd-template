@@ -1,26 +1,18 @@
 # DevOps Test App
 
-Простое REST API приложение с полным DevOps стеком для демонстрации навыков.
+Простое REST API приложение с полным DevOps стеком для демонстрации навыков автоматизации и развертывания.
 
-## 📋 Содержание
+## 📋 Описание
 
-- [Приложение](#-приложение)
-- [Структура проекта](#-структура-проекта)
-- [Быстрый старт](#-быстрый-старт)
-- [Разработка](#-разработка)
-- [Тестирование](#-тестирование)
-- [Развертывание](#-развертывание)
-- [CI/CD](#cicd)
+DevOps Test App - это комплексный проект, демонстрирующий навыки разработки, тестирования, контейнеризации и автоматизации развертывания. Проект включает Flask REST API, Bash скрипты диагностики, Docker контейнеризацию, CI/CD pipeline и Ansible автоматизацию.
 
-## 🚀 Приложение
+## 🔧 Требования
 
-Flask REST API с endpoints:
-- `GET /` - Hello World
-- `GET /health` - Health check
-- `GET /api/users` - Получить пользователей
-- `POST /api/users` - Создать пользователя
-- `GET /api/users/<id>` - Получить пользователя по ID
-- `DELETE /api/users/<id>` - Удалить пользователя
+- **Python 3.12+** - для запуска приложения и тестов
+- **Docker** - для контейнеризации
+- **Docker Compose** - для локального развертывания
+- **Ansible** - для автоматизации развертывания на серверах
+- **Git** - для контроля версий
 
 ## 📁 Структура проекта
 
@@ -52,35 +44,126 @@ simple-app/
 
 ## ⚡ Быстрый старт
 
-### Через Make (рекомендуется)
+### Локальный запуск приложения
+
 ```bash
 # Установка зависимостей
-make install
-
-# Запуск тестов
-make test
-
-# Сборка и запуск через Docker Compose
-make compose-up
-
-# Остановка
-make compose-down
-```
-
-### Вручную
-```bash
-# Python окружение
 pip install -r app/requirements.txt
 
 # Запуск приложения
-cd app && python main.py
+python app/main.py
 
-# Или через Docker
-docker build -t simple-app:latest .
-docker run -p 5000:5000 simple-app:latest
+# Проверка работы
+curl http://localhost:5000/health
 ```
 
+### Запуск через Docker Compose
+
+```bash
+# Сборка и запуск
+docker-compose up -d
+
+# Проверка здоровья
+curl http://localhost:5000/health
+
+# Просмотр логов
+docker-compose logs -f app
+
+# Остановка
+docker-compose down
+```
+
+## 📝 API Endpoints
+
+### Описание с примерами curl
+
+#### GET / - Приветствие
+```bash
+curl http://localhost:5000/
+```
+**Ответ:**
+```json
+{"message": "Hello, World!"}
+```
+
+#### GET /health - Проверка здоровья
+```bash
+curl http://localhost:5000/health
+```
+**Ответ:**
+```json
+{"status": "ok"}
+```
+
+#### GET /api/users - Получить всех пользователей
+```bash
+curl http://localhost:5000/api/users
+```
+**Ответ:**
+```json
+{"users": [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]}
+```
+
+#### POST /api/users - Создать пользователя
+```bash
+curl -X POST http://localhost:5000/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name": "John Doe"}'
+```
+**Ответ:**
+```json
+{"id": 3, "name": "John Doe"}
+```
+
+#### GET /api/users/<id> - Получить пользователя по ID
+```bash
+curl http://localhost:5000/api/users/1
+```
+**Ответ:**
+```json
+{"id": 1, "name": "Alice"}
+```
+
+#### DELETE /api/users/<id> - Удалить пользователя
+```bash
+curl -X DELETE http://localhost:5000/api/users/1
+```
+**Ответ:**
+```json
+{"message": "User deleted successfully", "user": {"id": 1, "name": "Alice"}}
+```
+
+## 🔍 Bash-скрипт диагностики
+
+### Описание
+`scripts/server-info.sh` - комплексный скрипт для диагностики сервера и проверки доступности сервисов.
+
+### Примеры использования
+
+```bash
+# Помощь
+./scripts/server-info.sh --help
+
+# Полная диагностика с проверкой сервисов
+./scripts/server-info.sh http://localhost:5000/health http://localhost:8080/health
+
+# Только системная информация
+./scripts/server-info.sh
+
+# С настройкой таймаута
+./scripts/server-info.sh --timeout 5 http://localhost:5000/health
+```
+
+### Функциональность
+- Системная информация (hostname, OS, kernel, uptime)
+- Использование ресурсов (CPU, RAM, disk)
+- Статус Docker контейнеров
+- Health checks для HTTP сервисов
+- Цветной вывод и логирование
+
 ## 🧪 Тестирование
+
+### Как запустить тесты
 
 ```bash
 # Запуск всех тестов
@@ -89,153 +172,148 @@ pytest app/tests/ -v
 # Запуск конкретного теста
 pytest app/tests/test_app.py::test_health -v
 
-# С покрытием кода
+# Запуск с покрытием кода
 pytest app/tests/ --cov=app --cov-report=html
+
+# Запуск через Make
+make test
 ```
 
-## 🔧 Разработка
+### Доступные тесты
+- `test_index` - проверка GET /
+- `test_health` - проверка GET /health
+- `test_get_users` - проверка GET /api/users
+- `test_create_user_success` - успешное создание пользователя
+- `test_create_user_fail` - ошибка валидации
+- `test_get_user_success` - получение пользователя
+- `test_get_user_not_found` - пользователь не найден
+- `test_delete_user_success` - успешное удаление
+- `test_delete_user_not_found` - удаление несуществующего
 
-### Локальная разработка
+## 🚀 Ansible развертывание
+
+### Шаги по развертыванию
+
+#### 1. Установка зависимостей Ansible
 ```bash
-# Запуск в режиме разработки
-FLASK_ENV=development python app/main.py
-
-# Проверка кода
-make lint
-
-# Диагностика сервера
-./scripts/server-info.sh http://localhost:5000/health
+ansible-galaxy collection install -r ansible/requirements.yml
 ```
 
-### Docker разработка
-```bash
-# Сборка образа
-make docker-build
-
-# Запуск с volume для разработки
-docker-compose up -d
-
-# Просмотр логов
-docker-compose logs -f app
+#### 2. Настройка инвентаря
+Отредактируйте `ansible/inventory.ini`:
+```ini
+[webservers]
+app-server-1 ansible_host=10.0.1.10 ansible_user=ubuntu
 ```
 
-## 🚀 Развертывание
-
-### Docker Compose
+#### 3. Проверка синтаксиса
 ```bash
-# Продакшн развертывание
-docker-compose -f docker-compose.yml up -d
-
-# Проверка здоровья
-curl http://localhost:5000/health
-```
-
-### Ansible
-```bash
-# Проверка синтаксиса
 ansible-playbook --syntax-check -i ansible/inventory.ini ansible/playbook.yml
+```
 
-# Dry run
+#### 4. Dry run (тестовый запуск)
+```bash
 ansible-playbook -i ansible/inventory.ini ansible/playbook.yml --check
+```
 
-# Развертывание
+#### 5. Развертывание
+```bash
 ansible-playbook -i ansible/inventory.ini ansible/playbook.yml -vvv
 ```
 
-## 🔄 CI/CD
+#### 6. Проверка подключения
+```bash
+ansible webservers -i ansible/inventory.ini -m ping
+```
 
-GitHub Actions автоматически:
-- Линтит Bash скрипты (shellcheck)
-- Запускает тесты (pytest)
+### Что делает Ansible
+- Устанавливает Docker и docker-compose
+- Создает директорию приложения
+- Копирует файлы приложения
 - Собирает Docker образ
+- Запускает приложение через docker-compose
 - Проверяет health endpoint
+
+## 🛠️ Make команды
+
+```bash
+make help          # Показать справку
+make install       # Установка зависимостей
+make test          # Запуск тестов
+make lint          # Проверка кода
+make docker-build  # Сборка образа
+make compose-up    # Запуск Docker Compose
+make compose-down  # Остановка Docker Compose
+make ansible-check # Проверка Ansible
+```
+
+## � CI/CD
+
+GitHub Actions автоматически выполняет:
+- Линтинг Bash скриптов (shellcheck)
+- Запуск тестов (pytest)
+- Сборку Docker образа
+- Проверку health endpoint
 - Работает на push и PR в main ветку
-
-## 📊 Мониторинг
-
-### Health Checks
-```bash
-# Приложение
-curl http://localhost:5000/health
-
-# Docker контейнеры
-docker ps
-docker-compose ps
-```
-
-### Логи
-```bash
-# Docker Compose логи
-docker-compose logs -f app
-
-# Ansible развертывание
-ansible-playbook -i ansible/inventory.ini ansible/playbook.yml -vvv
-```
-
-## 🛠️ Доступные команды (Make)
-
-```bash
-help          # Показать справку
-install       # Установка зависимостей
-test          # Запуск тестов
-lint          # Проверка кода
-docker-build  # Сборка образа
-compose-up    # Запуск Docker Compose
-compose-down  # Остановка Docker Compose
-ansible-check # Проверка Ansible
-```
-
-## 📝 API Documentation
-
-### Endpoints
-
-#### GET /
-```json
-{"message": "Hello, World!"}
-```
-
-#### GET /health
-```json
-{"status": "ok"}
-```
-
-#### GET /api/users
-```json
-{"users": [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]}
-```
-
-#### POST /api/users
-```bash
-curl -X POST http://localhost:5000/api/users \
-  -H "Content-Type: application/json" \
-  -d '{"name": "John Doe"}'
-```
-
-#### GET /api/users/<id>
-```json
-{"id": 1, "name": "Alice"}
-```
-
-#### DELETE /api/users/<id>
-```json
-{"message": "User deleted successfully", "user": {"id": 1, "name": "Alice"}}
-```
 
 ## 🐛 Troubleshooting
 
-### Общие проблемы
-1. **Порт занят**: `sudo lsof -i :5000`
-2. **Docker проблемы**: `docker system prune`
-3. **Python зависимости**: `pip install --upgrade pip`
+### Решение проблем
 
-### Ansible проблемы
+#### Порт занят
+```bash
+# Найти процесс
+sudo lsof -i :5000
+
+# Убить процесс
+sudo kill -9 <PID>
+```
+
+#### Docker проблемы
+```bash
+# Очистка Docker
+docker system prune -a
+
+# Пересборка образа
+docker build --no-cache -t simple-app:latest .
+```
+
+#### Python зависимости
+```bash
+# Обновление pip
+pip install --upgrade pip
+
+# Переустановка зависимостей
+pip install -r app/requirements.txt --force-reinstall
+```
+
+#### Ansible проблемы
 ```bash
 # Проверка подключения
 ansible webservers -i ansible/inventory.ini -m ping
 
-# Проверка зависимостей
+# Установка коллекций
 ansible-galaxy collection install -r ansible/requirements.yml
+
+# Подробное логирование
+ansible-playbook -i ansible/inventory.ini ansible/playbook.yml -vvvv
 ```
+
+#### Проблемы с Bash скриптом
+```bash
+# Проверка синтаксиса
+shellcheck scripts/server-info.sh
+
+# Запуск с отладкой
+bash -x scripts/server-info.sh --help
+```
+
+### Частые ошибки
+
+1. **Permission denied** - проверьте права на выполнение скрипта
+2. **Connection refused** - убедитесь что приложение запущено
+3. **Module not found** - установите зависимости Python
+4. **Docker daemon not running** - запустите Docker сервис
 
 ## 📄 Лицензия
 
