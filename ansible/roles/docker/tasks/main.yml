@@ -13,15 +13,23 @@
       - software-properties-common
     state: present
 
-- name: Add Docker GPG key
-  apt_key:
-    url: https://download.docker.com/linux/debian/gpg
-    state: present
+- name: Remove old Docker repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+    state: absent
+
+- name: Add Docker GPG key to keyring
+  shell: |
+    curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    chmod a+r /etc/apt/keyrings/docker.gpg
+  args:
+    creates: /etc/apt/keyrings/docker.gpg
 
 - name: Add Docker repository
   apt_repository:
-    repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
     state: present
+    update_cache: yes
 
 - name: Install Docker
   apt:
@@ -40,7 +48,7 @@
 
 - name: Add current user to docker group
   user:
-    name: "{{ ansible_user }}"
+    name: "{{ ansible_facts['user'] }}"
     groups: docker
     append: yes
 
@@ -48,4 +56,4 @@
   pip:
     name: docker-compose
     state: present
-  when: ansible_distribution_version is version('20.04', '<')
+  when: ansible_facts['distribution_version'] is version('20.04', '<')
