@@ -64,5 +64,10 @@ server_diag.log
 # Backup files
 *.bak
 *~
-%USERPROFILE%/.ssh/github-actions-key.pub
+
+# Documentation
+docs/
+*.md
+!README.md
 %USERPROFILE%/.ssh/github-actions-key
+%USERPROFILE%/.ssh/github-actions-key.pub

@@ -308,13 +308,6 @@ shellcheck scripts/server-info.sh
 bash -x scripts/server-info.sh --help
 ```
 
-### Частые ошибки
-
-1. **Permission denied** - проверьте права на выполнение скрипта
-2. **Connection refused** - убедитесь что приложение запущено
-3. **Module not found** - установите зависимости Python
-4. **Docker daemon not running** - запустите Docker сервис
-
 ## 📄 Лицензия
 
 MIT License - свободное использование и модификация.
