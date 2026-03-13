@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Server Diagnostics Script
 # Collects system information and checks service availability

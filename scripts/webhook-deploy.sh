@@ -6,7 +6,7 @@
 echo "Starting webhook deploy at $(date)"
 
 # Переходим в директорию проекта
-cd /opt/simple-app
+cd /opt/simple-app || exit 1
 
 # Получаем последние изменения
 git pull origin main
