@@ -1,8 +1,15 @@
 ---
+- name: Check if Docker is installed
+  command: docker --version
+  register: docker_check
+  failed_when: false
+  changed_when: false
+
 - name: Update apt cache
   apt:
     update_cache: yes
     cache_valid_time: 3600
+  when: docker_check.rc != 0
 
 - name: Install required packages
   apt:
@@ -12,11 +19,13 @@
       - curl
       - software-properties-common
     state: present
+  when: docker_check.rc != 0
 
 - name: Remove old Docker repository
   apt_repository:
     repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
     state: absent
+  when: docker_check.rc != 0
 
 - name: Add Docker GPG key to keyring
   shell: |
@@ -24,12 +33,14 @@
     chmod a+r /etc/apt/keyrings/docker.gpg
   args:
     creates: /etc/apt/keyrings/docker.gpg
+  when: docker_check.rc != 0
 
 - name: Add Docker repository
   apt_repository:
     repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
     state: present
     update_cache: yes
+  when: docker_check.rc != 0
 
 - name: Install Docker
   apt:
@@ -39,18 +50,19 @@
       - containerd.io
       - docker-compose-plugin
     state: present
+  when: docker_check.rc != 0
 
 - name: Start and enable Docker service
   systemd:
     name: docker
     state: started
-    enabled: yes
+  when: docker_check.rc != 0
 
 - name: Add current user to docker group
   user:
     name: "{{ ansible_facts['user'] }}"
     groups: docker
-    append: yes
+  when: docker_check.rc != 0
 
 - name: Install docker-compose (if not available as plugin)
   pip:
