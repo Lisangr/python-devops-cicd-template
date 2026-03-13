@@ -29,12 +29,15 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          echo "Host ${{ secrets.SERVER_HOST }}" >> ~/.ssh/config
+          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
+          echo "  UserKnownHostsFile=/dev/null" >> ~/.ssh/config
       
       - name: Create inventory file
         run: |
           cat > ansible/inventory.ini << EOF
           [webservers]
-          app-server-1 ansible_host=${{ secrets.SERVER_HOST }} ansible_user=${{ secrets.SERVER_USER }}
+          app-server-1 ansible_host=${{ secrets.SERVER_HOST }} ansible_user=${{ secrets.SERVER_USER }} ansible_ssh_common_args='-o StrictHostKeyChecking=no' ansible_ssh_pass='${{ secrets.SERVER_PASS }}'
           EOF
       
       - name: Deploy to server
