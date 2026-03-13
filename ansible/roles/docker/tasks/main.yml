@@ -64,8 +64,17 @@
     groups: docker
   when: docker_check.rc != 0
 
+- name: Check if docker-compose is available
+  command: docker compose version
+  register: docker_compose_check
+  failed_when: false
+  changed_when: false
+
 - name: Install docker-compose (if not available as plugin)
   pip:
     name: docker-compose
     state: present
-  when: ansible_facts['distribution_version'] is version('20.04', '<')
+  when: 
+    - docker_check.rc != 0
+    - docker_compose_check.rc != 0
+    - ansible_facts['distribution_version'] is version('20.04', '<')
