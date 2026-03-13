@@ -23,6 +23,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install ansible
       
+      - name: Install Ansible collections
+        run: |
+          ansible-galaxy collection install community.docker ansible.posix
+      
       - name: Setup SSH keys
         run: |
           mkdir -p ~/.ssh

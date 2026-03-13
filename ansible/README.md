@@ -1,10 +1,10 @@
 # Ansible Deployment Guide
 
 ## Overview
-This Ansible playbook automates the deployment of the Simple App application on Ubuntu servers.
+This Ansible playbook automates deployment of Simple App application on Debian 12 servers.
 
 ## Prerequisites
-- Ubuntu 20.04+ target servers
+- Debian 12+ target servers
 - Ansible control node with Python 3.8+
 - SSH access to target servers with sudo privileges
 

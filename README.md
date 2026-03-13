@@ -203,7 +203,7 @@ ansible-galaxy collection install -r ansible/requirements.yml
 Отредактируйте `ansible/inventory.ini`:
 ```ini
 [webservers]
-app-server-1 ansible_host=10.0.1.10 ansible_user=ubuntu
+app-server-1 ansible_host=10.0.1.10 ansible_user=root
 ```
 
 #### 3. Проверка синтаксиса
