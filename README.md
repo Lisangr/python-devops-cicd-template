@@ -1,35 +1,33 @@
-# DevOps Test App
+# Python REST API & Full DevOps CI/CD Template
 
-Простое REST API приложение с полным DevOps стеком для демонстрации навыков автоматизации и развертывания.
+Эталонный продакшн-шаблон микросервиса на базе Flask REST API с полным циклом автоматизации жизненного цикла: юнит-тестирование (`pytest`), статический анализ кода и скриптов (`flake8`, `shellcheck`), контейнеризация (Docker Compose v2), конфигурационный менеджмент (модульные роли Ansible) и CI/CD пайплайн на GitHub Actions.
 
 ## 📋 Описание
 
-DevOps Test App - это комплексный проект, демонстрирующий навыки разработки, тестирования, контейнеризации и автоматизации развертывания. Проект включает Flask REST API, Bash скрипты диагностики, Docker контейнеризацию, CI/CD pipeline и Ansible автоматизацию.
+Проект представляет собой готовый каркас для быстрого развертывания и сопровождения Python-сервисов на Linux-серверах. Включает REST API с покрытием тестами, автономный Bash-скрипт диагностики хоста и healthcheck-проверок, стандартизированный `Makefile`, идемпотентные роли Ansible и автоматический пайплайн сборки, тестирования и доставки.
 
 ## 🔧 Требования
 
-- **Python 3.12+** - для запуска приложения и тестов
-- **Docker** - для контейнеризации
-- **Docker Compose** - для локального развертывания
-- **Ansible** - для автоматизации развертывания на серверах
-- **Git** - для контроля версий
+- **Python 3.12+** — для запуска приложения и тестов
+- **Docker Engine** — для контейнеризации
+- **Docker Compose v2** (`docker compose`) — для локального и серверного развертывания
+- **Ansible 2.15+** — для автоматизации настройки серверов и деплоя
+- **Git** — для контроля версий
 
 ## 📁 Структура проекта
 
-```
-simple-app/
+```text
+python-devops-cicd-template/
 ├── app/
-│   ├── main.py              # REST API приложение
-│   ├── requirements.txt      # зависимости Python
+│   ├── main.py              # Flask REST API приложение
+│   ├── requirements.txt     # Зависимости Python
 │   └── tests/
-│       └── test_app.py       # тесты
+│       └── test_app.py      # Юнит-тесты (pytest)
 ├── scripts/
-│   └── server-info.sh        # Bash-скрипт диагностики
-├── Dockerfile               # контейнеризация
-├── docker-compose.yml       # локальное развертывание
+│   └── server-info.sh       # Bash-скрипт системной диагностики и healthcheck
 ├── ansible/
-│   ├── playbook.yml         # Ansible playbook
-│   ├── inventory.ini         # список серверов
+│   ├── playbook.yml         # Основной Ansible playbook
+│   ├── inventory.ini        # Инвентарь целевых серверов
 │   └── roles/
 │       ├── docker/
 │       │   └── tasks/main.yml
@@ -37,47 +35,50 @@ simple-app/
 │           └── tasks/main.yml
 ├── .github/
 │   └── workflows/
-│       └── build.yml        # GitHub Actions
-├── README.md                # документация
-└── Makefile                 # команды
+│       └── ci-cd.yml        # GitHub Actions (CI тесты + CD деплой)
+├── Dockerfile               # Многоэтапная/оптимизированная сборка образа
+├── docker-compose.yml       # Оркестрация контейнеров
+├── Makefile                 # Шорткаты для разработки, тестов и деплоя
+├── .flake8                  # Конфигурация линтера Python
+└── README.md                # Документация проекта
 ```
 
 ## ⚡ Быстрый старт
 
-### Локальный запуск приложения
+### 1. Клонирование репозитория
 
 ```bash
-# Установка зависимостей
-pip install -r app/requirements.txt
-
-# Запуск приложения
-python app/main.py
-
-# Проверка работы
-curl http://localhost:5000/health
+git clone https://github.com
+cd python-devops-cicd-template
 ```
 
-### Запуск через Docker Compose
+### 2. Запуск через Docker Compose
 
 ```bash
-# Сборка и запуск
-docker-compose up -d
+# Сборка и запуск в фоновом режиме
+docker compose up -d --build
 
-# Проверка здоровья
-curl http://localhost:5000/health
+# Проверка здоровья сервиса
+curl -f http://localhost:5000/health
 
-# Просмотр логов
-docker-compose logs -f app
+# Просмотр логов приложения
+docker compose logs -f app
 
-# Остановка
-docker-compose down
+# Остановка и удаление контейнеров
+docker compose down
+```
+
+### 3. Локальный запуск (для разработки)
+
+```bash
+pip install -r app/requirements.txt
+python app/main.py
+curl -f http://localhost:5000/health
 ```
 
 ## 📝 API Endpoints
 
-### Описание с примерами curl
-
-#### GET / - Приветствие
+#### `GET /` — Приветствие
 ```bash
 curl http://localhost:5000/
 ```
@@ -86,7 +87,7 @@ curl http://localhost:5000/
 {"message": "Hello, World!"}
 ```
 
-#### GET /health - Проверка здоровья
+#### `GET /health` — Проверка здоровья (Healthcheck)
 ```bash
 curl http://localhost:5000/health
 ```
@@ -95,7 +96,7 @@ curl http://localhost:5000/health
 {"status": "ok"}
 ```
 
-#### GET /api/users - Получить всех пользователей
+#### `GET /api/users` — Получить список пользователей
 ```bash
 curl http://localhost:5000/api/users
 ```
@@ -104,7 +105,7 @@ curl http://localhost:5000/api/users
 {"users": [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]}
 ```
 
-#### POST /api/users - Создать пользователя
+#### `POST /api/users` — Создать пользователя
 ```bash
 curl -X POST http://localhost:5000/api/users \
   -H "Content-Type: application/json" \
@@ -115,7 +116,7 @@ curl -X POST http://localhost:5000/api/users \
 {"id": 3, "name": "John Doe"}
 ```
 
-#### GET /api/users/<id> - Получить пользователя по ID
+#### `GET /api/users/<id>` — Получить пользователя по ID
 ```bash
 curl http://localhost:5000/api/users/1
 ```
@@ -124,7 +125,7 @@ curl http://localhost:5000/api/users/1
 {"id": 1, "name": "Alice"}
 ```
 
-#### DELETE /api/users/<id> - Удалить пользователя
+#### `DELETE /api/users/<id>` — Удалить пользователя
 ```bash
 curl -X DELETE http://localhost:5000/api/users/1
 ```
@@ -135,179 +136,126 @@ curl -X DELETE http://localhost:5000/api/users/1
 
 ## 🔍 Bash-скрипт диагностики
 
-### Описание
-`scripts/server-info.sh` - комплексный скрипт для диагностики сервера и проверки доступности сервисов.
-
-### Примеры использования
+`scripts/server-info.sh` — автономная утилита для быстрого аудита состояния сервера и проверки доступности HTTP-эндпоинтов.
 
 ```bash
-# Помощь
+# Справка по флагам
 ./scripts/server-info.sh --help
 
 # Полная диагностика с проверкой сервисов
 ./scripts/server-info.sh http://localhost:5000/health http://localhost:8080/health
 
-# Только системная информация
+# Только системные метрики хоста
 ./scripts/server-info.sh
 
-# С настройкой таймаута
+# Проверка с кастомным таймаутом
 ./scripts/server-info.sh --timeout 5 http://localhost:5000/health
 ```
 
-### Функциональность
-- Системная информация (hostname, OS, kernel, uptime)
-- Использование ресурсов (CPU, RAM, disk)
-- Статус Docker контейнеров
-- Health checks для HTTP сервисов
-- Цветной вывод и логирование
+**Собираемые данные:**
+- Системная информация (`hostname`, OS, версия ядра, `uptime`)
+- Утилизация ресурсов (CPU Load Average, RAM, дисковое пространство)
+- Статус запущенных Docker-контейнеров
+- HTTP Healthcheck целевых сервисов с логированием
 
-## 🧪 Тестирование
-
-### Как запустить тесты
+## 🧪 Тестирование и линтинг
 
 ```bash
-# Запуск всех тестов
+# Запуск всех тестов с подробным выводом
 pytest app/tests/ -v
 
 # Запуск конкретного теста
 pytest app/tests/test_app.py::test_health -v
 
-# Запуск с покрытием кода
+# Запуск с генерацией отчета покрытия (Coverage)
 pytest app/tests/ --cov=app --cov-report=html
 
-# Запуск через Make
+# Запуск через Makefile
 make test
+make lint
 ```
 
-### Доступные тесты
-- `test_index` - проверка GET /
-- `test_health` - проверка GET /health
-- `test_get_users` - проверка GET /api/users
-- `test_create_user_success` - успешное создание пользователя
-- `test_create_user_fail` - ошибка валидации
-- `test_get_user_success` - получение пользователя
-- `test_get_user_not_found` - пользователь не найден
-- `test_delete_user_success` - успешное удаление
-- `test_delete_user_not_found` - удаление несуществующего
+**Покрытие тестами:** `test_index`, `test_health`, `test_get_users`, `test_create_user_success`, `test_create_user_fail`, `test_get_user_success`, `test_get_user_not_found`, `test_delete_user_success`, `test_delete_user_not_found`.
 
 ## 🚀 Ansible развертывание
 
-### Шаги по развертыванию
+### 1. Подготовка и проверка
 
-#### 1. Установка зависимостей Ansible
 ```bash
+# Установка необходимых коллекций Ansible
 ansible-galaxy collection install -r ansible/requirements.yml
-```
 
-#### 2. Настройка инвентаря
-Отредактируйте `ansible/inventory.ini`:
-```ini
-[webservers]
-app-server-1 ansible_host=10.0.1.10 ansible_user=root
-```
+# Настройка целевого хоста в ansible/inventory.ini
+# [webservers]
+# app-server-1 ansible_host=10.0.1.10 ansible_user=deploy
 
-#### 3. Проверка синтаксиса
-```bash
+# Проверка синтаксиса плейбука
 ansible-playbook --syntax-check -i ansible/inventory.ini ansible/playbook.yml
-```
 
-#### 4. Dry run (тестовый запуск)
-```bash
-ansible-playbook -i ansible/inventory.ini ansible/playbook.yml --check
-```
-
-#### 5. Развертывание
-```bash
-ansible-playbook -i ansible/inventory.ini ansible/playbook.yml -vvv
-```
-
-#### 6. Проверка подключения
-```bash
+# Проверка SSH-доступности хостов
 ansible webservers -i ansible/inventory.ini -m ping
 ```
 
-### Что делает Ansible
-- Устанавливает Docker и docker-compose
-- Создает директорию приложения
-- Копирует файлы приложения
-- Собирает Docker образ
-- Запускает приложение через docker-compose
-- Проверяет health endpoint
+### 2. Dry-run и боевой прогон
+
+```bash
+# Тестовый прогон без внесения изменений (--check)
+ansible-playbook -i ansible/inventory.ini ansible/playbook.yml --check
+
+# Боевое развертывание
+ansible-playbook -i ansible/inventory.ini ansible/playbook.yml -v
+```
+
+**Этапы работы ролей Ansible:**
+- Установка Docker Engine и плагина Docker Compose (`role: docker`)
+- Подготовка директории приложения и синхронизация файлов (`role: app`)
+- Сборка образа, запуск контейнеров и проверка `/health` эндпоинта
 
 ## 🛠️ Make команды
 
 ```bash
-make help          # Показать справку
-make install       # Установка зависимостей
-make test          # Запуск тестов
-make lint          # Проверка кода
-make docker-build  # Сборка образа
-make compose-up    # Запуск Docker Compose
-make compose-down  # Остановка Docker Compose
-make ansible-check # Проверка Ansible
+make help          # Показать список доступных команд
+make install       # Установка Python-зависимостей
+make test          # Запуск юнит-тестов (pytest)
+make lint          # Проверка стиля кода (flake8)
+make docker-build  # Сборка Docker-образа
+make compose-up    # Запуск стека через Docker Compose
+make compose-down  # Остановка стека
+make ansible-check # Проверка синтаксиса Ansible
 ```
 
-## � CI/CD
+## 🔄 CI/CD (GitHub Actions)
 
-GitHub Actions автоматически выполняет:
-- Линтинг Bash скриптов (shellcheck)
-- Запуск тестов (pytest)
-- Сборку Docker образа
-- Проверку health endpoint
-- Работает на push и PR в main ветку
+Пайплайн в `.github/workflows/ci-cd.yml` срабатывает автоматически при `push` и `pull_request` в ветку `main`:
+1. **Linting:** проверка Bash-скриптов через `shellcheck` и кода Python через `flake8`.
+2. **Unit Tests:** прогон тестового набора `pytest`.
+3. **Container Smoke Test:** сборка Docker-образа, запуск контейнера и проверка ответа `/health`.
+4. **Continuous Deployment:** автоматический запуск `ansible-playbook` по SSH при успешном прохождении CI в ветке `main` (при наличии секретов `SERVER_HOST`, `SERVER_USER`, `SSH_PRIVATE_KEY`).
 
 ## 🐛 Troubleshooting
 
-### Решение проблем
-
-#### Порт занят
+#### Порт 5000 уже занят
 ```bash
-# Найти процесс
-sudo lsof -i :5000
-
-# Убить процесс
-sudo kill -9 <PID>
+sudo ss -tulpn | grep :5000
+# Завершить мешающий процесс или переопределить порт в docker-compose.yml
 ```
 
-#### Docker проблемы
+#### Ошибки сборки или кэша Docker
 ```bash
-# Очистка Docker
-docker system prune -a
-
-# Пересборка образа
+docker compose down --rmi local
 docker build --no-cache -t simple-app:latest .
 ```
 
-#### Python зависимости
+#### Отладка Bash-скриптов и Ansible
 ```bash
-# Обновление pip
-pip install --upgrade pip
-
-# Переустановка зависимостей
-pip install -r app/requirements.txt --force-reinstall
-```
-
-#### Ansible проблемы
-```bash
-# Проверка подключения
-ansible webservers -i ansible/inventory.ini -m ping
-
-# Установка коллекций
-ansible-galaxy collection install -r ansible/requirements.yml
-
-# Подробное логирование
-ansible-playbook -i ansible/inventory.ini ansible/playbook.yml -vvvv
-```
-
-#### Проблемы с Bash скриптом
-```bash
-# Проверка синтаксиса
+# Проверка синтаксиса и трассировка выполнения скрипта
 shellcheck scripts/server-info.sh
-
-# Запуск с отладкой
 bash -x scripts/server-info.sh --help
+
+# Запуск Ansible с максимальной детализацией вывода
+ansible-playbook -i ansible/inventory.ini ansible/playbook.yml -vvvv
 ```
 
 ## 📄 Лицензия
 
-MIT License - свободное использование и модификация.
+MIT License — свободное использование и модификация.
